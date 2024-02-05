@@ -44,7 +44,7 @@ echo "     [1. ROS-NOETİC Kurulumu]"
 echo ""
 echo "     [2. ROS-NOETİC Kaldır]"
 echo ""
-
+start="ROS-Noetic-kurulumu" 
 read -p ">>> Seçeneklerden birini seçiniz:" answer 
 
 case "$answer" in
