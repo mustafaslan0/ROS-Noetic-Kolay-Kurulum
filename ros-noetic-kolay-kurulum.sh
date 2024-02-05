@@ -188,14 +188,14 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     ros_kurulumu_tamamlandi=1
     sudo apt-get install -y ros-${name_ros_distro}-${package_type} > log.txt &
     pid1=$!
-    while &ros_kurulumu_tamamlandi; do
+    while [ $ros_kurulumu_tamamlandi -ne 1 ]; do
     satir_sayisi=$(wc -l < log.txt)
     yuzde=$((satir_sayisi / 200)) 
     echo "ilerleme: $yuzde"
     sleep 1  # Örnek olarak 0.1 saniye bekleme
-
-    # İkinci işlem: ROS kurulumu tamamlandığında
-
+    if [ $yuzde -eq 100 ]; then
+        ros_kurulumu_tamamlandi=0
+    fi
     done &
     pid2=$!
     wait $pid1
