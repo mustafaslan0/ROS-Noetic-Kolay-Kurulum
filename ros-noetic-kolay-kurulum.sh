@@ -1,6 +1,5 @@
 #!/bin/bash -eu
 #set -x
-
 name_ros_distro=noetic 
 user_name=$(whoami)
 
