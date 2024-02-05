@@ -190,13 +190,13 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     pid1=$!
     while [ $ros_kurulumu_tamamlandi -ne 1 ]; do
     satir_sayisi=$(wc -l < log.txt)
-    yuzde=$((satir_sayisi / 47)) 
+    yuzde=$((satir_sayisi / 1)) 
     echo "ilerleme: $yuzde"
     sleep 0.1  # Örnek olarak 0.1 saniye bekleme
     done &
     pid2=$!
     wait $pid1
-    ros_kurulumu_tamamlandi=0
+    ros_kurulumu_tamamlandi=1
     wait $pid2
 
     echo ""
