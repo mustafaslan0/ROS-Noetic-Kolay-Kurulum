@@ -39,7 +39,7 @@ echo -e "\e[1;31m
 echo -e "\e[33m>>> AslanRobotics ROS-NOETİC kurulum asistanı\e[0m\n"
 
 # Kullanıcıya seçenekler sunulur
-echo "     [1. ROS-NOETİC Kurulumu]"
+echo "     [1. ROS-NOETİC Kur]"
 echo ""
 echo "     [2. ROS-NOETİC Kaldır]"
 echo ""
