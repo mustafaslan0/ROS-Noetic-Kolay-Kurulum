@@ -186,16 +186,13 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     echo -e "\e[33m>>>  {ROS kurulumu başlatılıyor, yaklaşık 20 dakika sürecektir. İnternet bağlantınıza bağlı olarak değişir}\e[0m"
     echo ""
     ros_kurulumu_tamamlandi=1
-    sudo apt-get install -y ros-noetic-${package_type} > log.txt && ros_kurulumu_tamamlandi=1 &
+    sudo apt-get install -y ros-noetic-${package_type} > log.txt || ros_kurulumu_tamamlandi=0 &
     pid1=$!
     while [ $ros_kurulumu_tamamlandi -ne 1 ]; do
     satir_sayisi=$(wc -l < log.txt)
     yuzde=$((satir_sayisi / 200)) 
     echo "ilerleme: $yuzde"
     sleep 0.1  # Örnek olarak 0.1 saniye bekleme
-    if [ $yuzde -eq 100 ]; then
-        ros_kurulumu_tamamlandi=0
-    fi
     done &
     pid2=$!
     wait $pid1
