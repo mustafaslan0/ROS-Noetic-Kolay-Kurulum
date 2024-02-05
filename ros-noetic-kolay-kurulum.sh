@@ -196,7 +196,6 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     done &
     pid2=$!
     wait $pid1
-    ros_kurulumu_tamamlandi=1
     wait $pid2
 
     echo ""
