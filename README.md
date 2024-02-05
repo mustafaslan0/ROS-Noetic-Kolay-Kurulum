@@ -18,6 +18,7 @@ Bu repo, ROS Noetic'in kolay bir şekilde kurulumunu sağlamak için bir betik i
 
 3. İlk olarak, kurulum veya kaldırma yapmak istediğinizi soran bir soru alacaksınız.
 
+## kurulum 
 4. Kurulum için "1" tuşuna basın.
 
 5. Ardından, ROS Noetic'in sürümünü seçin:
@@ -26,6 +27,10 @@ Bu repo, ROS Noetic'in kolay bir şekilde kurulumunu sağlamak için bir betik i
    - base: Minimum kurulumu içerir.
 
 6. Seçiminize göre devam edin.
+
+## kaldırma
+4. kaldırmak için "2" tuşuna basın. Ardından kadırma işlemleri otomatik olarak gerçekleşecektir.
+
 
 ## Örnek Kullanım
 
