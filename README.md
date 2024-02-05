@@ -42,3 +42,13 @@ chmod +x ros-noetic-kolay-kurulum.sh
 
 # Betiği çalıştırma
 ./ros-noetic-kolay-kurulum.sh
+
+
+# sadece .bashrc ye ekleyerekde kullanıla bilir
+if [ ! -f ~/.ros_installed ]; then
+    git clone https://github.com/mustafaslan0/ROS-Noetic-Kolay-Kurulum.git
+    chmod +x ROS-Noetic-Kolay-Kurulum/ros-noetic-kolay-kurulum.sh
+    ./ROS-Noetic-Kolay-Kurulum/ros-noetic-kolay-kurulum.sh
+    rm -rf ROS-Noetic-Kolay-Kurulum
+    touch ~/.ros_installed
+fi
