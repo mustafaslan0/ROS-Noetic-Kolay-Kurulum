@@ -188,7 +188,7 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     ros_kurulumu_tamamlandi=1
     sudo apt-get install -y ros-${name_ros_distro}-${package_type} > log.txt &
     pid1=$!
-    while ros_kurulumu_tamamlandi; do
+    while [ros_kurulumu_tamamlandi==1]; do
     satir_sayisi=$(wc -l < log.txt)
     yuzde=$((satir_sayisi / 200)) 
     echo "ilerleme: $yuzde"
