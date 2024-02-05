@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 #set -x
 name_ros_distro=noetic 
-ROS_DISTRO=noetic
+
 user_name=$(whoami)
 
 
@@ -192,7 +192,7 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     satir_sayisi=$(wc -l < log.txt)
     yuzde=$((satir_sayisi / 200)) 
     echo "ilerleme: $yuzde"
-    sleep 1  # Örnek olarak 0.1 saniye bekleme
+    sleep 0.1  # Örnek olarak 0.1 saniye bekleme
     if [ $yuzde -eq 100 ]; then
         ros_kurulumu_tamamlandi=0
     fi
@@ -210,7 +210,6 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     echo ""
     echo "source /opt/ros/noetic/setup.bash" >> /home/$user_name/.bashrc
     source /home/$user_name/.bashrc
-    source /opt/ros/noetic/setup.bash
     sudo apt install -y python3-rosdep python3-rosinstall python3
     echo -e "\e[32mROS Noetic kurulumu tamamlandı.\e[0m"
 
