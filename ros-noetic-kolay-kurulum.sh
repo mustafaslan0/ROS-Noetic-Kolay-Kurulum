@@ -1,4 +1,3 @@
-#!/bin/bash
 #!/bin/bash -eu
 #set -x
 
