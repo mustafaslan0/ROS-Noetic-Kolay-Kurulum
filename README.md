@@ -3,6 +3,10 @@
 
 
 Bu repo, ROS Noetic'in kolay bir şekilde kurulumunu sağlamak için bir betik içerir.
+  ```bash
+    git clone https://github.com/mustafaslan0/ROS-Noetic-Kolay-Kurulum.git
+    ```
+
 
 ## Kullanım
 
