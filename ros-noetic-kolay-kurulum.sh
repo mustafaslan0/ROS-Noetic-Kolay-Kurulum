@@ -137,7 +137,8 @@ if [ "$start" == "ROS-Noetic-kurulumu" ]; then
     # Anahtarları ekleyin
     echo -e "\e[33m>>> {Anahtarlar eklenirken bekleniyor, birkaç saniye sürecek}\e[0m"
     echo ""
-    ret=$(curl -sSL 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC1CF6E31E6BADE8868B172B4F42ED6FBAB17C654' | sudo apt-key add -)
+    ret=$(curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -)
+    
 
     # Return değerini kontrol et
     case $ret in
