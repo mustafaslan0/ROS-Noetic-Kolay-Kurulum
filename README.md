@@ -6,7 +6,7 @@ Bu repo, ROS Noetic'in kolay bir şekilde kurulumunu sağlamak için bir betik i
   ```bash
   git clone https://github.com/mustafaslan0/ROS-Noetic-Kolay-Kurulum.git
   ```
-
+ÖRNEK VİDEO : https://www.youtube.com/watch?v=8wgiStd4tjc
 
 ## Kullanım
 
