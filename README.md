@@ -37,7 +37,8 @@ Bu repo, ROS Noetic'in kolay bir şekilde kurulumunu sağlamak için bir betik i
 
 4. kaldırmak için "2" tuşuna basın. Ardından kadırma işlemleri otomatik olarak gerçekleşecektir.
 
-
+## vmware ROS kurulu sanal makine
+link : https://mega.nz/file/QFIDQI4Q#7iFmjgmvu26ZYVLJKaLbzw6BeOqsx_ftoXq09Uhl4jA
 ## Örnek Kullanım
 
 ```bash
