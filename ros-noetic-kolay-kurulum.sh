@@ -1,189 +1,173 @@
 #!/bin/bash -eu
-#set -x
-name_ros_distro=noetic 
 
 user_name=$(whoami)
 
-
-
-
-echo -e "\e[33m>>> AslanRobotics ROS-NOETİC kurulum asistanı\e[0m\n"
-
-# Kullanıcıya seçenekler sunulur
-echo "     [1. ROS-NOETİC Kur]"
+echo -e "\e[33m>>> AslanRobotics ROS Kurulum Asistanı\e[0m"
+echo -e "\e[33m>>> Desteklenen: ROS Noetic | ROS2 Humble | ROS2 Jazzy\e[0m"
 echo ""
-echo "     [2. ROS-NOETİC Kaldır]"
+
+# Ubuntu sürümü tespit et
+version=$(lsb_release -sc)
+relesenum=$(grep DISTRIB_DESCRIPTION /etc/*-release | awk -F 'Ubuntu ' '{print $2}' | awk -F ' LTS' '{print $1}')
+echo -e "\e[36m>>> Sistem: Ubuntu $version $relesenum\e[0m"
 echo ""
-start="ROS-Noetic-kurulumu" 
-read -p ">>> Seçeneklerden birini seçiniz:" answer 
 
-case "$answer" in
-  1)
-    start="ROS-Noetic-kurulumu"
-    ;;
-  2)
-    start="ROS-Noetic-kaldır"
-    ;;
-
+# Ubuntu sürümüne göre ROS dağıtımını belirle
+case $version in
+    "focal")
+        ros_distro="noetic"
+        ros_label="ROS Noetic (ROS1)"
+        ;;
+    "jammy")
+        ros_distro="humble"
+        ros_label="ROS2 Humble"
+        ;;
+    "noble")
+        ros_distro="jazzy"
+        ros_label="ROS2 Jazzy"
+        ;;
+    *)
+        echo -e "\e[31m>>> HATA: Desteklenmeyen Ubuntu sürümü: '$version'\e[0m"
+        echo -e "\e[33mDesteklenen Ubuntu sürümleri:\e[0m"
+        echo "  Ubuntu 20.04 (Focal)  →  ROS Noetic"
+        echo "  Ubuntu 22.04 (Jammy)  →  ROS2 Humble"
+        echo "  Ubuntu 24.04 (Noble)  →  ROS2 Jazzy"
+        exit 1
+        ;;
 esac
 
+echo -e "\e[33m>>> Ubuntu $version için önerilen: $ros_label\e[0m"
+echo ""
+echo "     [1. $ros_label Kur]"
+echo ""
+echo "     [2. ROS Kaldır]"
+echo ""
+read -p ">>> Seçeneklerden birini seçiniz: " answer
 
-
-
-
-if [ "$start" == "ROS-Noetic-kurulumu" ]; then
-
-    echo "#######################################################################################################################"
-    echo "Mevcut Kullanıcı: $user_name" 
-    echo -e "\e[33m>>> {ROS Noetic Kurulumuna Başlanıyor}\e[0m"
-    echo ""
-    echo -e "\e[33m>>> {Ubuntu sürümü kontrol ediliyor}\e[0m"
-    echo ""
-    # Ubuntu sürümünün versiyonunu ve sürüm numarasını alın
-    version=`lsb_release -sc`
-    relesenum=`grep DISTRIB_DESCRIPTION /etc/*-release | awk -F 'Ubuntu ' '{print $2}' | awk -F ' LTS' '{print $1}'`
-    echo -e "\e[33m>>> {Ubuntu sürümünüz: [Ubuntu $version $relesenum]}\e[0m"
-    # Sürümün focal olup olmadığını kontrol et, değilse çık
-    case $version in
-    "focal" )
-    ;;
+case "$answer" in
+    1) action="install" ;;
+    2) action="uninstall" ;;
     *)
-        echo -e "\e[31m>>> {HATA: Bu betik yalnızca Ubuntu Focal (20.04) üzerinde çalışır.}\e[0m"
-        exit 0
+        echo -e "\e[31m>>> Geçersiz seçim, çıkılıyor.\e[0m"
+        exit 1
+        ;;
+esac
+
+# ───────────────────── KURULUM ─────────────────────
+if [ "$action" == "install" ]; then
+
+    echo ""
+    echo "###########################################################"
+    echo -e "\e[33m>>> $ros_label Kurulumu Başlatılıyor\e[0m"
+    echo "###########################################################"
+
+    # Adım 1: Locale
+    echo ""
+    echo -e "\e[33m>>> [Adım 1] Locale ayarlanıyor...\e[0m"
+    sudo apt update -y
+    sudo apt install -y locales
+    sudo locale-gen en_US en_US.UTF-8
+    sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+    export LANG=en_US.UTF-8
+    echo -e "\e[32m>>> Locale ayarlandı.\e[0m"
+
+    # Adım 2: Depolar
+    echo ""
+    echo -e "\e[33m>>> [Adım 2] Ubuntu depoları yapılandırılıyor...\e[0m"
+    sudo apt install -y software-properties-common curl gnupg2 lsb-release
+    sudo add-apt-repository universe -y
+    sudo add-apt-repository restricted -y
+    sudo add-apt-repository multiverse -y
+    sudo apt update -y
+    echo -e "\e[32m>>> Depolar eklendi.\e[0m"
+
+    # Adım 3: ROS kaynağı ekle
+    echo ""
+    echo -e "\e[33m>>> [Adım 3] ROS kaynağı ekleniyor...\e[0m"
+
+    if [ "$ros_distro" == "noetic" ]; then
+        sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu ${version} main\" > /etc/apt/sources.list.d/ros-latest.list"
+        ret=$(curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -)
+        case $ret in
+            "OK") ;;
+            *) echo -e "\e[31m>>> HATA: ROS anahtarları eklenemedi\e[0m"; exit 1 ;;
+        esac
+    else
+        # ROS2 Humble ve Jazzy için modern GPG yöntemi
+        sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
+            | sudo gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu ${version} main" \
+            | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+    fi
+    echo -e "\e[32m>>> ROS kaynağı eklendi.\e[0m"
+
+    # Adım 4: Paket türü seçimi
+    echo ""
+    echo "###########################################################"
+    echo -e "\e[33m>>> [Adım 4] Kurulum türü seçin:\e[0m"
+    echo ""
+    echo "     [1. Desktop-Full (Tavsiye Edilen)]"
+    echo "        Masaüstü + 2D/3D simülatörler + algılama paketleri"
+    echo ""
+    echo "     [2. Desktop]"
+    echo "        RViz + rqt + temel araçlar"
+    echo ""
+    echo "     [3. ROS-Base (Minimal)]"
+    echo "        Yalnızca iletişim kütüphaneleri, GUI araçları yok"
+    echo ""
+    read -p "Kurulum türünü seçin (Varsayılan 1): " pkg_answer
+
+    case "$pkg_answer" in
+        2)    package_type="desktop" ;;
+        3)    package_type="ros-base" ;;
+        *)    package_type="desktop-full" ;;
     esac
 
+    # Adım 5: Kurulum
     echo ""
-    echo -e "\e[33m>>> {Ubuntu Focal 20.04, Ubuntu Focal 20.04 ile tam uyumludur}\e[0m"
+    echo -e "\e[33m>>> [Adım 5] ros-${ros_distro}-${package_type} kuruluyor...\e[0m"
+    echo -e "\e[33m>>> (İnternet hızınıza bağlı olarak 10-30 dakika sürebilir)\e[0m"
     echo ""
-    echo "#######################################################################################################################"
-    echo -e "\e[33m>>> {Adım 1: Ubuntu depolarını yapılandırın}\e[0m"
-    echo ""
-    # "restricted," "universe," ve "multiverse" izin vermek için Ubuntu depolarını yapılandırın. Ubuntu kılavuzunu izleyerek bunu yapma talimatları için Ubuntu kılavuzunu izleyebilirsiniz. 
-    # https://help.ubuntu.com/community/Repositories/Ubuntu
+    sudo apt update -y
+    sudo apt install -y ros-${ros_distro}-${package_type}
 
-    sudo add-apt-repository universe
-    sudo add-apt-repository restricted
-    sudo add-apt-repository multiverse
-
-    sudo apt update
-
+    # Adım 6: Bağımlılıklar ve ortam ayarı
     echo ""
-    echo -e "\e[32m>>> {Tamamlandı: Ubuntu depoları eklendi}\e[0m"
-    echo ""
-    echo "#######################################################################################################################"
-    echo -e "\e[33m>>> {Adım 2: sources.list dosyanızı ayarlayın}\e[0m"
-    echo ""
+    echo -e "\e[33m>>> [Adım 6] Bağımlılıklar ve ortam ayarlanıyor...\e[0m"
 
-    # Bu, ROS Noetic paket listesini sources.list'e ekleyecektir
-    sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu ${version} main\" > /etc/apt/sources.list.d/ros-latest.list"
-
-    # Dosyanın eklenip eklenmediğini kontrol et
-    if [ ! -e /etc/apt/sources.list.d/ros-latest.list ]; then
-    echo -e "\e[31m>>> {Hata: sources.list eklenemedi, çıkılıyor}\e[0m"
-    exit 0
+    if [ "$ros_distro" == "noetic" ]; then
+        sudo apt install -y python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
+        if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
+            sudo rosdep init
+        fi
+        rosdep update
+    else
+        sudo apt install -y ros-dev-tools python3-argcomplete
     fi
 
-    echo -e "\e[32m>>> {Tamamlandı: sources.list eklendi}\e[0m"
-    echo ""
-    echo "#######################################################################################################################"
-    echo -e "\e[33m>>> {Adım 3: Anahtarları ayarlayın}\e[0m"
-    echo ""
-    echo -e "\e[33m>>> {Anahtarları eklemek için curl yükleniyor}\e[0m"
-    # Curl yükleyin: Proxy sunucusu arkasındaysanız apt-key komutu yerine curl'i kullanabilirsiniz: 
-    #TODO: Paket kontrolü bazen çalışmıyor, bu nedenle devre dışı bırakılıyor
-    # Curl yüklü mü kontrol et
-    #name=curl
-    #which $name > /dev/null 2>&1
-
-    #if [ $? == 0 ]; then
-    #    echo "Curl zaten yüklü!"
-    #else
-    #    echo "Curl yüklü değil, Curl yükleniyor"
-
-    sudo apt install -y curl
-    #fi
-
-    echo "#######################################################################################################################"
-    echo ""
-    # Anahtarları ekleyin
-    echo -e "\e[33m>>> {Anahtarlar eklenirken bekleniyor, birkaç saniye sürecek}\e[0m"
-    echo ""
-    ret=$(curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -)
-    
-
-    # Return değerini kontrol et
-    case $ret in
-    "OK" )
-    ;;
-    *)
-        echo -e "\e[31m>>> {HATA: ROS anahtarları eklenemedi}\e[0m"
-        exit 0
-    esac
-
-    echo -e "\e[32m>>> {Tamamlandı: Anahtarlar eklendi}\e[0m"
-    echo ""
-    echo "#######################################################################################################################"
-    echo -e "\e[33m>>> {Adım 4: Ubuntu paket dizinini güncelleme, bağlantı hızınıza bağlı olarak birkaç dakika sürecektir}\e[0m"
-    echo ""
-    sudo apt update
-    echo ""
-    echo "#######################################################################################################################"
-    echo -e "\e[33m>>> {Adım 5: ROS kurulumu, ROS'un hangi bölümünü kurmak istediğinizi seçebilirsiniz.}\e[0m"
-    echo "     [1. Desktop-Full Kurulumu (Tavsiye Edilen): Masaüstüne ek olarak 2D/3D simülatörler ve 2D/3D algılama paketleri içerir]"
-    echo ""
-    echo "     [2. Desktop Kurulumu: ROS-Base'deki her şeyin yanı sıra rqt ve rviz gibi araçları içerir]"
-    echo ""
-    echo "     [3. ROS-Base: (Temel) ROS paketleme, derleme ve iletişim kütüphaneleri. GUI araçları yok.]"
-    echo ""
-    # Varsayılan değeri 1 olarak atayın: Desktop full kurulum
-    read -p "Kurulumunuzu seçin (Varsayılan 1):" answer 
-
-    case "$answer" in
-    1)
-        package_type="desktop-full"
-        ;;
-    2)
-        package_type="desktop"
-        ;;
-    3)
-        package_type="ros-base"
-        ;;
-    * )
-        package_type="desktop-full"
-        ;;
-    esac
-    echo "#######################################################################################################################"
-    echo ""
-    echo -e "\e[33m>>>  {ROS kurulumu başlatılıyor, yaklaşık 20 dakika sürecektir. İnternet bağlantınıza bağlı olarak değişir}\e[0m"
-    echo ""
-    ros_kurulumu_tamamlandi=1
-    sudo apt-get install -y ros-noetic-${package_type} > log.txt
-    ros_kurulumu_tamamlandi=0 &
-    pid1=$!
-    while [ $ros_kurulumu_tamamlandi -ne 1 ]; do
-    satir_sayisi=$(wc -l < log.txt)
-    yuzde=$((satir_sayisi / 1)) 
-    echo "ilerleme: $yuzde"
-    sleep 0.1  # Örnek olarak 0.1 saniye bekleme
-    done &
-    pid2=$!
-    wait $pid1
-    wait $pid2
+    # .bashrc'ye ekle (zaten ekliyse atla)
+    if ! grep -q "source /opt/ros/${ros_distro}/setup.bash" /home/$user_name/.bashrc 2>/dev/null; then
+        echo "source /opt/ros/${ros_distro}/setup.bash" >> /home/$user_name/.bashrc
+    fi
 
     echo ""
+    echo "###########################################################"
+    echo -e "\e[32m>>> $ros_label kurulumu başarıyla tamamlandı!\e[0m"
     echo ""
-    echo "#######################################################################################################################"
-    echo -e "\e[33m>>> {Adım 6: ROS Çevresini Ayarlama, Bu, ROS çevresini .bashrc'ye ekleyecektir.}\e[0m" 
-    echo -e "\e[33m>>> {Bunu ekledikten sonra, terminalde ROS komutlarına erişebileceksiniz}\e[0m"
-    echo ""
-    echo "source /opt/ros/noetic/setup.bash" >> /home/$user_name/.bashrc
-    source /home/$user_name/.bashrc
-    sudo apt install -y python3-rosdep python3-rosinstall python3
-    echo -e "\e[32mROS Noetic kurulumu tamamlandı.\e[0m"
+    echo -e "\e[36m>>> Terminali yeniden başlatın veya şu komutu çalıştırın:\e[0m"
+    echo -e "\e[36m    source ~/.bashrc\e[0m"
+    echo "###########################################################"
 
+# ───────────────────── KALDIRMA ─────────────────────
 else
-    echo -e "\e[32mRos kaldırma işlemi başlatılıyor...\e[0m"
-    sudo apt-get purge ros-* 
-    sudo apt-get autoremove
-    echo -e "\e[32mRos kaldırma işlemi Başarı ile tamamlandı...\e[0m"
+    echo ""
+    echo -e "\e[33m>>> ROS kaldırma işlemi başlatılıyor...\e[0m"
+    sudo apt-get purge -y 'ros-*' || true
+    sudo apt-get autoremove -y
+    sudo rm -f /etc/apt/sources.list.d/ros-latest.list
+    sudo rm -f /etc/apt/sources.list.d/ros2.list
+    sudo rm -f /usr/share/keyrings/ros-archive-keyring.gpg
+    # .bashrc'den ROS kaynak satırlarını temizle
+    sed -i '/source \/opt\/ros/d' /home/$user_name/.bashrc
+    echo -e "\e[32m>>> ROS kaldırma işlemi başarıyla tamamlandı!\e[0m"
 fi

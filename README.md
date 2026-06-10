@@ -81,17 +81,6 @@ fi
 
 ---
 
-## Dağıtıma Özel Betikler
-
-Belirli bir sürümü doğrudan kurmak isterseniz:
-
-| Betik | Ubuntu | Açıklama |
-|---|---|---|
-| `ros-kolay-kurulum.sh` | 20.04 / 22.04 / 24.04 | **Evrensel betik (önerilen)** |
-| `ros-noetic-kolay-kurulum.sh` | 20.04 Focal | Yalnızca ROS Noetic |
-
----
-
 ## VMware Sanal Makine (ROS Noetic Kurulu)
 
 Doğrudan kullanıma hazır sanal makine görüntüsü:  
